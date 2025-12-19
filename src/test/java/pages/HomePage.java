@@ -9,22 +9,40 @@ import java.time.Duration;
 
 public class HomePage {
 
-    WebDriver driver;
-    WebDriverWait wait;
+    private final WebDriver driver;
+    private final WebDriverWait wait;
+
+    private static final int STEP_SLEEP_MS = 1000;
+
+    // Cookies kabul butonu
+    private final By acceptCookiesBtn = By.id("onetrust-accept-btn-handler");
 
     public HomePage(WebDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
-    // Cookies kabul butonu
-    By acceptCookiesBtn = By.id("onetrust-accept-btn-handler");
-
     public void acceptCookiesIfPresent() {
         try {
-            wait.until(ExpectedConditions.elementToBeClickable(acceptCookiesBtn)).click();
-        } catch (Exception e) {
-            // Cookies çıkmazsa sorun yok
+            sleepStep(); // sayfa açılışını "insan gibi" bekle
+
+            wait.until(ExpectedConditions.elementToBeClickable(acceptCookiesBtn))
+                    .click();
+
+            sleepStep(); // cookie kapandıktan sonra bekle
+        } catch (Exception ignored) {
+            // Cookie çıkmayabilir, sorun değil
+        }
+    }
+
+    /* ----------------- UTIL ----------------- */
+
+    private void sleepStep() {
+        try {
+            Thread.sleep(STEP_SLEEP_MS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Thread sleep interrupted", e);
         }
     }
 }

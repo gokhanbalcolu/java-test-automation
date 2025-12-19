@@ -2,6 +2,7 @@ package tests;
 
 import base.BaseTest;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import pages.*;
 import utils.ExcelUtils;
@@ -10,37 +11,64 @@ import utils.TxtUtils;
 public class ZaraWebTest extends BaseTest {
 
     @Test
-    void zaraShoppingScenarioTest() throws InterruptedException {
+    void zaraShoppingScenarioTest() {
 
-        // 0) Siteye git
+        // 0) Test başlangıcı: ana sayfayı aç
         driver.get("https://www.zara.com/tr/");
-        String excelPath = "src/test/resources/testdata/searchData.xlsx";
 
-        HomePage home = new HomePage(driver);
-        home.acceptCookiesIfPresent();
+        HomePage homePage = new HomePage(driver);
+        homePage.acceptCookiesIfPresent();
 
-        // 1) Menü -> Erkek -> Tümünü Gör
+        // 1) Negatif login kontrolü (validasyon mesajı doğrulama)
+        // Amaç: Login akışına gidilebildiğini ve invalid email uyarısının geldiğini doğrulamak
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.goToLoginPage();
+
+// 1) Hatalı format email -> field error doğrula
+        String invalidEmailMsg = loginPage.verifyInvalidEmailFormat("abc");
+        Assertions.assertTrue(
+                invalidEmailMsg.toLowerCase().contains("geçersiz"),
+                "Format hata mesajı bekleniyordu. Gelen: " + invalidEmailMsg
+        );
+
+// 2) Email'i temizle
+        loginPage.clearEmail();
+
+// 3) Format doğru ama dummy email + şifre -> popup title doğrula
+        String popupTitle = loginPage.verifyInvalidCredentialsPopup(
+                "dummy.user@example.com",
+                "dummyPass123"
+        );
+        Assertions.assertTrue(
+                popupTitle.toLowerCase().contains("maalesef"),
+                "Popup başlığı beklenmiyordu. Gelen: " + popupTitle
+        );
+
+// 4) Ana sayfaya dön
+        loginPage.clickLogoToReturnHome();
+
+        // 2) Menü navigasyonu: Erkek kategorisi -> Tümünü Gör
+        // Amaç: kategori sayfasına stabil şekilde erişmek
         MenuPage menuPage = new MenuPage(driver);
         menuPage.openMenu();
         menuPage.openMenCategory();
         menuPage.clickViewAll();
 
-        // 2) Arama sayfası
+        // 3) Arama ekranı aç
         SearchPage searchPage = new SearchPage(driver);
         searchPage.openSearch();
 
-        // 3) Excel’den kelimeleri oku (A1 ve B1)
-        String shortWord = ExcelUtils.getCellData(excelPath, 0, 0); // A1: şort
-        String shirtWord = ExcelUtils.getCellData(excelPath, 0, 1); // B1: gömlek
+        // 4) Test datası: Excel’den arama kelimelerini oku (A1, B1)
+        String excelPath = "src/test/resources/testdata/searchData.xlsx";
+        String shortWord = ExcelUtils.getCellData(excelPath, 0, 0); // A1
+        String shirtWord = ExcelUtils.getCellData(excelPath, 0, 1); // B1
 
-        // 4) "şort" yaz -> sil
+        // 5) Arama davranışı: önce yaz/sil, sonra gerçek kelimeyle ara
+        // Amaç: input temizleme + arama tetikleme akışını doğrulamak
         searchPage.writeText(shortWord);
-        Thread.sleep(1500);
 
         searchPage.clearText();
-        Thread.sleep(1000);
 
-        // 5) "gömlek" yaz -> Enter
         searchPage.writeText(shirtWord);
         searchPage.pressEnter();
 
@@ -48,24 +76,19 @@ public class ZaraWebTest extends BaseTest {
         SearchResultPage resultPage = new SearchResultPage(driver);
         resultPage.selectRandomProductFromResults();
 
-        Thread.sleep(2000); // gözle görmek için (istersen kaldır)
-
-        // 7) Ürün detay: isim + fiyat al, txt yaz
+        // 7) Ürün detay: isim + fiyatı al ve txt’ye yaz
         ProductDetailPage productPage = new ProductDetailPage(driver);
-
         String productNameText = productPage.getProductName();
-        String productPriceText = productPage.getProductPrice(); // ✅ tek fiyat değişkeni bu
+        String productPriceText = productPage.getProductPrice();
 
-        System.out.println("📌 Ürün sayfası fiyatı: " + productPriceText);
         TxtUtils.writeProductInfo(productNameText, productPriceText);
 
-        // 8) Sepete ekle (beden seçerek) ve popup’tan sepete git
+        // 8) Sepete ekle (beden gerekiyorsa seç) ve sepete git
         productPage.addToCartSelectingRandomSize();
         productPage.goToCartFromAddToCartPopup();
 
-        // 9) Sepet: birim fiyat al, ürün fiyatıyla karşılaştır
+        // 9) Sepet doğrulaması: ürün sayfası fiyatı == sepet birim fiyat
         CartPage cartPage = new CartPage(driver);
-
         String cartUnitPriceText = cartPage.getCartItemUnitPrice();
 
         Assertions.assertEquals(
@@ -74,13 +97,10 @@ public class ZaraWebTest extends BaseTest {
                 "Ürün fiyatı ile sepetteki birim fiyat eşleşmiyor!"
         );
 
-        System.out.println("✅ Fiyat karşılaştırıldı: Ürün sayfası (" + productPriceText +
-                ") == Sepet (" + cartUnitPriceText + ")");
-
-        // 10) Adet artır -> 2 doğrula
+        // 10) Adet artır ve 2 olduğunu doğrula (metodun içinde assert/verify varsa ayrıca gerek yok)
         cartPage.increaseQuantityTo2();
 
-        // 11) Ürünü tamamen sil (2 kere -) -> sepet boş doğrula
+        // 11) Ürünü tamamen sil ve sepetin boş olduğunu doğrula
         cartPage.removeItemCompletely();
     }
 }

@@ -8,17 +8,19 @@ import java.time.Duration;
 
 public class MenuPage {
 
-    WebDriver driver;
-    WebDriverWait wait;
+    private final WebDriver driver;
+    private final WebDriverWait wait;
 
-    private By menuButton =
+    private static final int STEP_SLEEP_MS = 1000;
+
+    private final By menuButton =
             By.cssSelector("button[data-qa-id='layout-header-toggle-menu']");
 
-    private By menMenu = By.xpath(
+    private final By menMenu = By.xpath(
             "//span[contains(@class,'layout-categories-category-name') and normalize-space()='ERKEK']"
     );
 
-    private By viewAllButton = By.xpath(
+    private final By viewAllButton = By.xpath(
             "//span[contains(@class,'layout-categories-category-name') and normalize-space()='TÜMÜNÜ GÖR']"
     );
 
@@ -27,30 +29,43 @@ public class MenuPage {
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(15));
     }
 
+    /* ===================== ACTIONS ===================== */
+
     public void openMenu() {
         WebElement menu = wait.until(
                 ExpectedConditions.elementToBeClickable(menuButton)
         );
+
         menu.click();
+        sleepStep();
     }
 
     public void openMenCategory() {
         WebElement men = wait.until(
                 ExpectedConditions.visibilityOfElementLocated(menMenu)
         );
+
         men.click();
+        sleepStep();
     }
 
     public void clickViewAll() {
         WebElement viewAll = wait.until(
                 ExpectedConditions.elementToBeClickable(viewAllButton)
         );
-        viewAll.click();
 
+        viewAll.click();
+        sleepStep();
+    }
+
+    /* ===================== UTIL ===================== */
+
+    private void sleepStep() {
         try {
-            Thread.sleep(5000); // 5 saniye bekle
+            Thread.sleep(STEP_SLEEP_MS);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Thread sleep interrupted", e);
         }
     }
 }

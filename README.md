@@ -1,58 +1,121 @@
 # Zara Test Otomasyon Projesi
 
+Bu proje, **Selenium WebDriver** kullanılarak Zara Türkiye web sitesi üzerinde
+uçtan uca (E2E) test otomasyonu gerçekleştirmek amacıyla hazırlanmıştır.
+Proje, gerçek bir e-ticaret senaryosunu temel alır ve otomasyon mimarisi,
+kurumsal projelerde kullanılan standartlara uygun şekilde tasarlanmıştır.
+
+---
+
 ## Kullanılan Teknolojiler
-- Java
-- Maven
-- Selenium WebDriver
-- JUnit 5
-- Log4j
-- Apache POI (Excel işlemleri)
-- Rest-Assured (API testleri)
 
-## Proje Yapısı
-- Page Object Model (POM) tasarım deseni kullanılmıştır
-- OOP (Nesne Yönelimli Programlama) prensiplerine uygun geliştirilmiştir
-- Web ve API otomasyonları için ayrı sayfa (page) sınıfları bulunmaktadır
+- **Java**
+- **Maven**
+- **Selenium WebDriver**
+- **JUnit 5**
+- **Log4j** (loglama)
+- **Apache POI** (Excel veri okuma)
+- **Rest-Assured** (API otomasyonu – opsiyonel modül)
 
-## Web Otomasyon Senaryosu
+---
 
-- Zara Türkiye web sitesi açılır
-- Çerez (cookie) popup’ı kabul edilir
+## Proje Mimarisi
 
-### Login Adımı
-- Login sayfası Page Object olarak **oluşturulmuştur**
+- **Page Object Model (POM)** tasarım deseni kullanılmıştır
+- **OOP (Nesne Yönelimli Programlama)** prensiplerine uygun geliştirilmiştir
+- Web ve API otomasyonları **ayrı katmanlarda** ele alınmıştır
+- Testler okunabilir, sürdürülebilir ve genişletilebilir olacak şekilde tasarlanmıştır
 
-> **Not:**  
-> Login işlemi için gerekli sayfa ve metotlar tanımlanmış olmasına rağmen,
-> gerçek kullanıcı doğrulaması (telefon numarası ve SMS onayı) gerektirdiği için
-> test çalıştırması sırasında **bilinçli olarak atlanmıştır**.
+---
+
+## Selenium Web Otomasyon Senaryosu
+
+1. Zara Türkiye web sitesi açılır
+2. Çerez (cookie) bilgilendirme popup’ı kabul edilir
+
+### Login Akışı
+
+- Login ekranı **Page Object** olarak oluşturulmuştur
+
+> **Önemli Not:**  
+> Login işlemi teknik olarak tasarlanmış ve gerekli locator/metotlar
+> tanımlanmıştır.  
+> Ancak Zara giriş süreci telefon numarası ve SMS doğrulaması gerektirdiği için,
+> test çalıştırmaları sırasında **bilinçli olarak atlanmıştır**.
 >
-> Senaryo, misafir kullanıcı (guest user) olarak devam etmektedir.
-> Bu yaklaşım, güvenlik hassasiyeti olan akışlar için otomasyon projelerinde
-> yaygın ve kabul edilebilir bir yöntemdir.
+> Senaryo, **misafir kullanıcı (guest user)** akışı ile devam eder.  
+> Bu yaklaşım, güvenlik ve doğrulama gerektiren adımların otomasyon dışında
+> bırakılması açısından **sektörde yaygın ve kabul edilebilir bir yöntemdir**.
 
-- Menü → Erkek → Tümünü Gör adımlarına gidilir
-- Arama kelimeleri Excel dosyasından okunur
+---
+
+## Ürün Arama ve Sepet Senaryosu
+
+- Menü → **Erkek → Tümünü Gör** adımlarına gidilir
+- Arama kelimeleri **Excel dosyasından** okunur
   - İlk kelime yazılır ve silinir
-  - İkinci kelime yazılır ve Enter tuşu ile arama yapılır
-- Arama sonuçlarından rastgele bir ürün seçilir
+  - İkinci kelime yazılır ve **Enter** ile arama yapılır
+- Arama sonuçlarından **rastgele bir ürün** seçilir
 - Ürün adı ve fiyat bilgisi alınır
 - Ürün bilgileri `.txt` dosyasına yazılır
-- Ürün sepete eklenir (rastgele uygun beden seçimi yapılır)
-- Ürün sayfasındaki fiyat ile sepetteki birim fiyat karşılaştırılır
-- Ürün adedi artırılarak doğrulanır
-- Ürün sepetten silinir ve sepetin boş olduğu kontrol edilir
+- Ürün sepete eklenir
+  - Rastgele uygun beden seçimi yapılır
+- Ürün detay sayfasındaki fiyat ile sepetteki birim fiyat karşılaştırılır
+- Ürün adedi artırılarak fiyat doğrulaması yapılır
+- Ürün sepetten silinir
+- Sepetin boş olduğu kontrol edilir
 
-## API Otomasyon (Web Servis)
+---
 
-- Trello REST API kullanılarak Rest-Assured ile otomasyon yapılmıştır
+## Bekleme (Wait) Yönetimi
+
+- Testlerde **hard wait kullanımından kaçınılmıştır**
+- Ağırlıklı olarak:
+  - `WebDriverWait`
+  - `ExpectedConditions`
+    kullanılmıştır
+
+Bazı sayfa geçişlerinde, akışın daha net gözlemlenebilmesi amacıyla
+**bilinçli olarak kısa bekleme süreleri** eklenmiştir.
+
+Bu yapı;
+- Dinamik elementlerin stabil yakalanmasını
+- Demo ve değerlendirme süreçlerinde test akışının daha anlaşılır olmasını
+  amaçlar.
+
+CI/CD veya performans odaklı çalışmalarda bu süreler kolaylıkla
+optimize edilebilir yapıdadır.
+
+---
+
+## API Otomasyonu (Ek Modül)
+
+Proje kapsamında Selenium dışında, örnek amaçlı bir **API otomasyon modülü**
+de yer almaktadır.
+
+- **Trello REST API**
+- **Rest-Assured** kullanılmıştır
 - Board oluşturma
 - Kart oluşturma
 - Rastgele kart seçimi
 - Temizlik işlemleri (kart ve board silme)
 
-## Notlar
+> API otomasyonu, Selenium testlerinden **bağımsız** bir modül olarak
+> yapılandırılmıştır.
 
-Bu proje, otomasyon ödevi kapsamında hazırlanmıştır.  
-Login adımı teknik olarak tasarlanmış ancak gerçek kullanıcı verisi ve güvenlik
-kısıtları nedeniyle test çalıştırmasında bilinçli olarak atlanmıştır.
+---
+
+## Genel Notlar
+
+- Bu proje bir **test otomasyonu ödevi / demo çalışması** kapsamında hazırlanmıştır
+- Gerçek kullanıcı verisi, SMS doğrulama ve güvenlik gerektiren adımlar
+  bilinçli olarak test kapsamı dışında bırakılmıştır
+- Proje, kurumsal Selenium projelerinde kullanılan mimari ve yaklaşımları
+  örneklemek amacıyla geliştirilmiştir
+
+---
+
+## Çalıştırma
+
+```bash
+mvn clean test
