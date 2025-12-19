@@ -1,44 +1,58 @@
-# Zara Test Automation Project
+# Zara Test Otomasyon Projesi
 
-## Technologies
+## Kullanılan Teknolojiler
+- Java
+- Maven
+- Selenium WebDriver
+- JUnit 5
+- Log4j
+- Apache POI (Excel işlemleri)
+- Rest-Assured (API testleri)
 
-* Java
-* Maven
-* Selenium WebDriver
-* JUnit
-* Log4j
-* Apache POI (Excel operations)
-* Rest-Assured (API tests)
+## Proje Yapısı
+- Page Object Model (POM) tasarım deseni kullanılmıştır
+- OOP (Nesne Yönelimli Programlama) prensiplerine uygun geliştirilmiştir
+- Web ve API otomasyonları için ayrı sayfa (page) sınıfları bulunmaktadır
 
-## Project Structure
+## Web Otomasyon Senaryosu
 
-* Page Object Model (POM) design pattern is used
-* OOP principles are applied
+- Zara Türkiye web sitesi açılır
+- Çerez (cookie) popup’ı kabul edilir
 
-## Web Automation Scenario
+### Login Adımı
+- Login sayfası Page Object olarak **oluşturulmuştur**
 
-* Zara Turkey website is opened
-* Cookie popup is accepted
-* Login page is implemented as Page Object
+> **Not:**  
+> Login işlemi için gerekli sayfa ve metotlar tanımlanmış olmasına rağmen,
+> gerçek kullanıcı doğrulaması (telefon numarası ve SMS onayı) gerektirdiği için
+> test çalıştırması sırasında **bilinçli olarak atlanmıştır**.
+>
+> Senaryo, misafir kullanıcı (guest user) olarak devam etmektedir.
+> Bu yaklaşım, güvenlik hassasiyeti olan akışlar için otomasyon projelerinde
+> yaygın ve kabul edilebilir bir yöntemdir.
 
-  > **Note:** Login step is skipped during execution due to real user
-  > verification requirements (phone/SMS).
-  > Scenario continues as guest user.
-* Men → View All navigation
-* Search keywords are read from Excel file
-* Random product selection
-* Product info and price are written to txt file
-* Cart price validation
-* Quantity increase and cart validation
-* Cart cleanup and empty cart verification
+- Menü → Erkek → Tümünü Gör adımlarına gidilir
+- Arama kelimeleri Excel dosyasından okunur
+  - İlk kelime yazılır ve silinir
+  - İkinci kelime yazılır ve Enter tuşu ile arama yapılır
+- Arama sonuçlarından rastgele bir ürün seçilir
+- Ürün adı ve fiyat bilgisi alınır
+- Ürün bilgileri `.txt` dosyasına yazılır
+- Ürün sepete eklenir (rastgele uygun beden seçimi yapılır)
+- Ürün sayfasındaki fiyat ile sepetteki birim fiyat karşılaştırılır
+- Ürün adedi artırılarak doğrulanır
+- Ürün sepetten silinir ve sepetin boş olduğu kontrol edilir
 
-## API Automation
+## API Otomasyon (Web Servis)
 
-* Trello REST API automation using Rest-Assured
-* Board and card creation
-* Random card selection
-* Cleanup operations (delete cards and board)
+- Trello REST API kullanılarak Rest-Assured ile otomasyon yapılmıştır
+- Board oluşturma
+- Kart oluşturma
+- Rastgele kart seçimi
+- Temizlik işlemleri (kart ve board silme)
 
-## Notes
+## Notlar
 
-This project is created for automation assignment purposes.
+Bu proje, otomasyon ödevi kapsamında hazırlanmıştır.  
+Login adımı teknik olarak tasarlanmış ancak gerçek kullanıcı verisi ve güvenlik
+kısıtları nedeniyle test çalıştırmasında bilinçli olarak atlanmıştır.
