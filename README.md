@@ -1,73 +1,116 @@
 # Zara Test Otomasyon Projesi (Web + Trello API)
 
-Bu proje, bir otomasyon ödevi kapsamında **Zara web senaryosu** (Selenium + JUnit) ve **Trello REST API senaryosu** (Rest-Assured) içerir.
+Bu proje, bir **test otomasyonu ödevi** kapsamında geliştirilmiş olup:
+
+* **Zara web sitesi** için Selenium tabanlı UI otomasyon senaryolarını
+* **Trello REST API** için Rest-Assured tabanlı API otomasyon senaryolarını
+  içermektedir.
+
+Web ve API testleri **ayrı katmanlarda** ele alınmış, gerçek hayat senaryolarına uygun şekilde kurgulanmıştır.
+
+---
 
 ## Kullanılan Teknolojiler
-- Java 17
-- Maven
-- Selenium WebDriver
-- JUnit 5
-- WebDriverManager
-- Apache POI (Excel okuma)
-- Rest-Assured (API testleri)
-- Log4j / SLF4J
+
+* **Java 17**
+* **Maven**
+* **Selenium WebDriver**
+* **JUnit 5**
+* **WebDriverManager**
+* **Apache POI** (Excel okuma)
+* **Rest-Assured** (API testleri)
+* **Log4j / SLF4J**
+
+---
 
 ## Proje Yapısı
-- Page Object Model (POM) tasarım deseni kullanılmıştır.
-- Web ve API testleri ayrı sınıflar halinde geliştirilmiştir.
-- Test verisi Excel üzerinden okunur, ürün bilgisi TXT dosyasına yazılır.
+
+* **Page Object Model (POM)** tasarım deseni uygulanmıştır.
+* Web UI testleri ve API testleri **ayrı test sınıflarında** geliştirilmiştir.
+* Test verileri **Excel** dosyasından okunur.
+* Ürün bilgileri **TXT** dosyasına yazdırılır.
+* Beklemeler, dinamik yapı nedeniyle **WebDriverWait** ile yönetilmiştir.
+
+---
 
 ## Web Otomasyon Senaryosu (Zara)
-1. Zara Türkiye sitesi açılır
-2. Cookie pop-up kabul edilir
-3. **Login Page** oluşturulmuştur ve aşağıdaki adımlar gerçekleştirilir:
-  - Login ekranına gidilir
-  - Dummy e-posta ve şifre alanları doldurulur
-  - Geçersiz e-posta mesajı kontrol edilir
-  - Zara logosuna tıklanarak ana sayfaya dönülür
 
-> Not: Gerçek login akışı telefon/SMS doğrulaması gerektirebildiğinden, testte gerçek kullanıcı doğrulaması yapılmaz. Login sayfası POM olarak uygulanmış ve temel doğrulamalar eklenmiştir.
+1. Zara Türkiye web sitesi açılır.
+2. Cookie (çerez) pop-up kabul edilir.
+3. **Login Page** Page Object olarak oluşturulmuştur ve aşağıdaki kontroller yapılır:
 
-4. Menü > Erkek > Tümünü Gör
-5. Excel’den veri okuma:
-  - A1 hücresinden “şort” yazılır, silinir
-  - B1 hücresinden “gömlek” yazılır ve Enter basılır
-6. Arama sonucundan rastgele ürün seçilir
-7. Ürün adı ve fiyatı konsola yazdırılır ve TXT dosyasına kaydedilir
-8. Rastgele beden seçilerek sepete eklenir
-9. Ürün sayfasındaki fiyat ile sepetteki ürün birim fiyatı karşılaştırılır
-10. Adet 2 yapılır ve doğrulanır
-11. Ürün sepetten silinir, sepetin boş olduğu kontrol edilir
+    * Login ekranına yönlendirme
+    * Dummy e-posta ve şifre alanlarının doldurulması
+    * Geçersiz e-posta uyarı mesajının doğrulanması
+    * Zara logosuna tıklanarak ana sayfaya dönüş
+
+> **Not:**
+> Zara’nın gerçek login akışı telefon numarası ve SMS doğrulaması gerektirdiğinden,
+> test senaryosunda gerçek kullanıcı doğrulaması **bilinçli olarak yapılmamıştır**.
+> Login sayfası POM yapısında modellenmiş ve temel validasyonlar test edilmiştir.
+
+4. Menü → **Erkek** → **Tümünü Gör** adımlarına gidilir.
+5. Excel üzerinden veri okuma:
+
+    * A1 hücresine “şort” yazılır ve silinir
+    * B1 hücresinden “gömlek” okunur ve Enter tuşuna basılır
+6. Arama sonucundan **rastgele bir ürün** seçilir.
+7. Ürün adı ve fiyat:
+
+    * Konsola yazdırılır
+    * TXT dosyasına kaydedilir
+8. Rastgele beden seçilerek ürün sepete eklenir.
+9. Ürün sayfasındaki fiyat ile sepetteki ürün birim fiyatı karşılaştırılır.
+10. Ürün adedi **2** yapılır ve doğrulanır.
+11. Ürün sepetten silinir ve sepetin boş olduğu kontrol edilir.
 
 ### Çıktılar
-- `target\test-output\product.txt` içine ürün adı ve fiyatı yazılır.
+
+* Ürün adı ve fiyat bilgileri
+  `target/test-output/product.txt`
+  dosyasına yazılır.
+
+---
 
 ## API Otomasyon Senaryosu (Trello)
-1. Board oluşturulur
-2. Belirlenen kullanıcılar board’a davet edilir
-3. Board listeleri okunur, ilk listeye 2 adet kart eklenir
-4. Kartlardan biri rastgele seçilir
-5. Cleanup:
-  - Kartlar silinir
-  - Board silinir
 
-### Trello Key/Token (ENV)
-Bu proje Trello API için **environment variable** kullanır:
+1. Yeni bir **Board** oluşturulur.
+2. Belirlenen kullanıcılar board’a davet edilir.
+3. Board üzerindeki listeler okunur.
+4. İlk listeye **2 adet kart** eklenir.
+5. Kartlardan biri **rastgele** seçilir.
+6. **Cleanup işlemleri** gerçekleştirilir:
 
-- `TRELLO_KEY`
-- `TRELLO_TOKEN`
+    * Kartlar silinir
+    * Board silinir
 
-#### IntelliJ üzerinden ekleme
-Run/Debug Configurations → Environment variables kısmına ekleyin.
+---
 
-#### IntelliJ üzerinden ekleme
+## Trello API Key / Token (Environment Variable)
 
-Bu proje, otomasyon ödevi amacıyla hazırlanmıştır.
+Bu proje Trello API erişimi için **environment variable** kullanmaktadır.
 
-Zara sitesindeki dinamik yapı nedeniyle beklemeler WebDriverWait ile yönetilmiştir.
+Gerekli değişkenler:
 
-#### Komut satırı örneği (PowerShell)
+* `TRELLO_KEY`
+* `TRELLO_TOKEN`
+
+### IntelliJ IDEA üzerinden ekleme
+
+`Run / Debug Configurations` → `Environment Variables` alanına ekleyiniz.
+
+### Komut Satırı (PowerShell) Örneği
+
 ```powershell
 $env:TRELLO_KEY="xxx"
 $env:TRELLO_TOKEN="yyy"
 mvn test
+```
+
+---
+
+## Notlar
+
+* Bu proje **otomasyon ödevi** amacıyla hazırlanmıştır.
+* Zara sitesinin dinamik yapısı nedeniyle beklemeler explicit wait ile yönetilmiştir.
+* Gerçek kullanıcı verileri ve canlı hesaplar kullanılmamıştır.
