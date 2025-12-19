@@ -1,121 +1,73 @@
-# Zara Test Otomasyon Projesi
+# Zara Test Otomasyon Projesi (Web + Trello API)
 
-Bu proje, **Selenium WebDriver** kullanılarak Zara Türkiye web sitesi üzerinde
-uçtan uca (E2E) test otomasyonu gerçekleştirmek amacıyla hazırlanmıştır.
-Proje, gerçek bir e-ticaret senaryosunu temel alır ve otomasyon mimarisi,
-kurumsal projelerde kullanılan standartlara uygun şekilde tasarlanmıştır.
-
----
+Bu proje, bir otomasyon ödevi kapsamında **Zara web senaryosu** (Selenium + JUnit) ve **Trello REST API senaryosu** (Rest-Assured) içerir.
 
 ## Kullanılan Teknolojiler
+- Java 17
+- Maven
+- Selenium WebDriver
+- JUnit 5
+- WebDriverManager
+- Apache POI (Excel okuma)
+- Rest-Assured (API testleri)
+- Log4j / SLF4J
 
-- **Java**
-- **Maven**
-- **Selenium WebDriver**
-- **JUnit 5**
-- **Log4j** (loglama)
-- **Apache POI** (Excel veri okuma)
-- **Rest-Assured** (API otomasyonu – opsiyonel modül)
+## Proje Yapısı
+- Page Object Model (POM) tasarım deseni kullanılmıştır.
+- Web ve API testleri ayrı sınıflar halinde geliştirilmiştir.
+- Test verisi Excel üzerinden okunur, ürün bilgisi TXT dosyasına yazılır.
 
----
+## Web Otomasyon Senaryosu (Zara)
+1. Zara Türkiye sitesi açılır
+2. Cookie pop-up kabul edilir
+3. **Login Page** oluşturulmuştur ve aşağıdaki adımlar gerçekleştirilir:
+  - Login ekranına gidilir
+  - Dummy e-posta ve şifre alanları doldurulur
+  - Geçersiz e-posta mesajı kontrol edilir
+  - Zara logosuna tıklanarak ana sayfaya dönülür
 
-## Proje Mimarisi
+> Not: Gerçek login akışı telefon/SMS doğrulaması gerektirebildiğinden, testte gerçek kullanıcı doğrulaması yapılmaz. Login sayfası POM olarak uygulanmış ve temel doğrulamalar eklenmiştir.
 
-- **Page Object Model (POM)** tasarım deseni kullanılmıştır
-- **OOP (Nesne Yönelimli Programlama)** prensiplerine uygun geliştirilmiştir
-- Web ve API otomasyonları **ayrı katmanlarda** ele alınmıştır
-- Testler okunabilir, sürdürülebilir ve genişletilebilir olacak şekilde tasarlanmıştır
+4. Menü > Erkek > Tümünü Gör
+5. Excel’den veri okuma:
+  - A1 hücresinden “şort” yazılır, silinir
+  - B1 hücresinden “gömlek” yazılır ve Enter basılır
+6. Arama sonucundan rastgele ürün seçilir
+7. Ürün adı ve fiyatı konsola yazdırılır ve TXT dosyasına kaydedilir
+8. Rastgele beden seçilerek sepete eklenir
+9. Ürün sayfasındaki fiyat ile sepetteki ürün birim fiyatı karşılaştırılır
+10. Adet 2 yapılır ve doğrulanır
+11. Ürün sepetten silinir, sepetin boş olduğu kontrol edilir
 
----
+### Çıktılar
+- `src/test/resources/output/product.txt` içine ürün adı ve fiyatı yazılır.
 
-## Selenium Web Otomasyon Senaryosu
+## API Otomasyon Senaryosu (Trello)
+1. Board oluşturulur
+2. Belirlenen kullanıcılar board’a davet edilir
+3. Board listeleri okunur, ilk listeye 2 adet kart eklenir
+4. Kartlardan biri rastgele seçilir
+5. Cleanup:
+  - Kartlar silinir
+  - Board silinir
 
-1. Zara Türkiye web sitesi açılır
-2. Çerez (cookie) bilgilendirme popup’ı kabul edilir
+### Trello Key/Token (ENV)
+Bu proje Trello API için **environment variable** kullanır:
 
-### Login Akışı
+- `TRELLO_KEY`
+- `TRELLO_TOKEN`
 
-- Login ekranı **Page Object** olarak oluşturulmuştur
+#### IntelliJ üzerinden ekleme
+Run/Debug Configurations → Environment variables kısmına ekleyin.
 
-> **Önemli Not:**  
-> Login işlemi teknik olarak tasarlanmış ve gerekli locator/metotlar
-> tanımlanmıştır.  
-> Ancak Zara giriş süreci telefon numarası ve SMS doğrulaması gerektirdiği için,
-> test çalıştırmaları sırasında **bilinçli olarak atlanmıştır**.
->
-> Senaryo, **misafir kullanıcı (guest user)** akışı ile devam eder.  
-> Bu yaklaşım, güvenlik ve doğrulama gerektiren adımların otomasyon dışında
-> bırakılması açısından **sektörde yaygın ve kabul edilebilir bir yöntemdir**.
+#### IntelliJ üzerinden ekleme
 
----
+Bu proje, otomasyon ödevi amacıyla hazırlanmıştır.
 
-## Ürün Arama ve Sepet Senaryosu
+Zara sitesindeki dinamik yapı nedeniyle beklemeler WebDriverWait ile yönetilmiştir.
 
-- Menü → **Erkek → Tümünü Gör** adımlarına gidilir
-- Arama kelimeleri **Excel dosyasından** okunur
-  - İlk kelime yazılır ve silinir
-  - İkinci kelime yazılır ve **Enter** ile arama yapılır
-- Arama sonuçlarından **rastgele bir ürün** seçilir
-- Ürün adı ve fiyat bilgisi alınır
-- Ürün bilgileri `.txt` dosyasına yazılır
-- Ürün sepete eklenir
-  - Rastgele uygun beden seçimi yapılır
-- Ürün detay sayfasındaki fiyat ile sepetteki birim fiyat karşılaştırılır
-- Ürün adedi artırılarak fiyat doğrulaması yapılır
-- Ürün sepetten silinir
-- Sepetin boş olduğu kontrol edilir
-
----
-
-## Bekleme (Wait) Yönetimi
-
-- Testlerde **hard wait kullanımından kaçınılmıştır**
-- Ağırlıklı olarak:
-  - `WebDriverWait`
-  - `ExpectedConditions`
-    kullanılmıştır
-
-Bazı sayfa geçişlerinde, akışın daha net gözlemlenebilmesi amacıyla
-**bilinçli olarak kısa bekleme süreleri** eklenmiştir.
-
-Bu yapı;
-- Dinamik elementlerin stabil yakalanmasını
-- Demo ve değerlendirme süreçlerinde test akışının daha anlaşılır olmasını
-  amaçlar.
-
-CI/CD veya performans odaklı çalışmalarda bu süreler kolaylıkla
-optimize edilebilir yapıdadır.
-
----
-
-## API Otomasyonu (Ek Modül)
-
-Proje kapsamında Selenium dışında, örnek amaçlı bir **API otomasyon modülü**
-de yer almaktadır.
-
-- **Trello REST API**
-- **Rest-Assured** kullanılmıştır
-- Board oluşturma
-- Kart oluşturma
-- Rastgele kart seçimi
-- Temizlik işlemleri (kart ve board silme)
-
-> API otomasyonu, Selenium testlerinden **bağımsız** bir modül olarak
-> yapılandırılmıştır.
-
----
-
-## Genel Notlar
-
-- Bu proje bir **test otomasyonu ödevi / demo çalışması** kapsamında hazırlanmıştır
-- Gerçek kullanıcı verisi, SMS doğrulama ve güvenlik gerektiren adımlar
-  bilinçli olarak test kapsamı dışında bırakılmıştır
-- Proje, kurumsal Selenium projelerinde kullanılan mimari ve yaklaşımları
-  örneklemek amacıyla geliştirilmiştir
-
----
-
-## Çalıştırma
-
-```bash
-mvn clean test
+#### Komut satırı örneği (PowerShell)
+```powershell
+$env:TRELLO_KEY="xxx"
+$env:TRELLO_TOKEN="yyy"
+mvn test
