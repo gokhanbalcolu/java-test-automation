@@ -40,7 +40,7 @@ Bu proje, bir otomasyon ödevi kapsamında **Zara web senaryosu** (Selenium + JU
 11. Ürün sepetten silinir, sepetin boş olduğu kontrol edilir
 
 ### Çıktılar
-- `src/test/resources/output/product.txt` içine ürün adı ve fiyatı yazılır.
+- `target\test-output\product.txt` içine ürün adı ve fiyatı yazılır.
 
 ## API Otomasyon Senaryosu (Trello)
 1. Board oluşturulur
